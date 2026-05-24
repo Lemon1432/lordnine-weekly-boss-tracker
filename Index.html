@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weekly Boss Tracker</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#05090d;
+      color:white;
+      min-height:100vh;
+      padding:40px;
+      background-image:
+      radial-gradient(circle at top, rgba(255,215,0,0.08), transparent 35%),
+      radial-gradient(circle at bottom, rgba(0,140,255,0.08), transparent 35%);
+    }
+
+    .container{
+      max-width:1400px;
+      margin:auto;
+    }
+
+    .title{
+      font-size:2.5rem;
+      color:#f5d46f;
+      margin-bottom:30px;
+      letter-spacing:2px;
+    }
+
+    .boss-form{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:15px;
+      background:rgba(15,20,30,0.9);
+      border:1px solid rgba(255,215,0,0.15);
+      padding:20px;
+      border-radius:20px;
+      margin-bottom:35px;
+    }
+
+    .boss-form input{
+      height:52px;
+      border:none;
+      outline:none;
+      border-radius:12px;
+      padding:0 15px;
+      background:#101823;
+      color:white;
+      font-size:15px;
+    }
+
+    .boss-form button{
+      height:52px;
+      border:none;
+      border-radius:12px;
+      background:linear-gradient(135deg,#f7d56d,#b8891d);
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.25s;
+    }
+
+    .boss-form button:hover{
+      transform:translateY(-2px);
+    }
+
+    .boss-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+      gap:25px;
+    }
+
+    .boss-card{
+      background:linear-gradient(145deg,#121a25,#080d14);
+      border:1px solid rgba(255,215,0,0.18);
+      border-radius:24px;
+      overflow:hidden;
+      transition:0.3s;
+      position:relative;
+    }
+
+    .boss-card:hover{
+      transform:translateY(-5px);
+      box-shadow:0 0 25px rgba(255,215,0,0.12);
+    }
+
+    .boss-image{
+      width:100%;
+      height:420px;
+      object-fit:cover;
+      object-position:center top;
+      display:block;
+    }
+
+    .boss-content{
+      padding:24px;
+    }
+
+    .boss-type{
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:50px;
+      background:rgba(255,255,255,0.08);
+      color:#c7c7c7;
+      font-size:12px;
+      margin-bottom:15px;
+    }
+
+    .boss-name{
+      font-size:2rem;
+      margin-bottom:18px;
+    }
+
+    .timer-label{
+      color:#8f9aad;
+      font-size:12px;
+      letter-spacing:2px;
+      margin-bottom:10px;
+    }
+
+    .timer{
+      font-size:2.7rem;
+      font-weight:bold;
+      color:#61b7ff;
+      margin-bottom:22px;
+    }
+
+    .ready{
+      color:#5dff96 !important;
+    }
+
+    .info-box{
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.05);
+      border-radius:18px;
+      padding:18px;
+      margin-bottom:15px;
+    }
+
+    .info-box h4{
+      font-size:12px;
+      color:#9aa7ba;
+      margin-bottom:8px;
+      letter-spacing:1px;
+    }
+
+    .info-box p{
+      font-size:18px;
+      font-weight:bold;
+    }
+
+    .buttons{
+      display:flex;
+      gap:12px;
+      margin-top:20px;
+      flex-wrap:wrap;
+    }
+
+    .buttons button{
+      flex:1;
+      min-width:120px;
+      height:48px;
+      border:none;
+      border-radius:12px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .dead-btn{
+      background:#ff5d5d;
+      color:white;
+    }
+
+    .arrival-btn{
+      background:#5d8dff;
+      color:white;
+    }
+
+    .delete-btn{
+      background:rgba(255,255,255,0.08);
+      color:white;
+    }
+
+    .buttons button:hover{
+      opacity:0.85;
+    }
+
+    .empty{
+      text-align:center;
+      padding:80px 20px;
+      color:#7d8798;
+      border:1px dashed rgba(255,255,255,0.08);
+      border-radius:20px;
+    }
+
+    /* MODAL */
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.7);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:999;
+      padding:20px;
+    }
+
+    .modal.active{
+      display:flex;
+    }
+
+    .modal-box{
+      width:100%;
+      max-width:420px;
+      background:#111827;
+      border:1px solid rgba(255,215,0,0.15);
+      border-radius:24px;
+      padding:25px;
+    }
+
+    .modal-box h2{
+      margin-bottom:20px;
+      color:#f5d46f;
+    }
+
+    .modal-box input{
+      width:100%;
+      height:55px;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      background:#0b1220;
+      color:white;
+      padding:0 15px;
+      font-size:16px;
+      margin-bottom:20px;
+    }
+
+    .modal-buttons{
+      display:flex;
+      gap:12px;
+    }
+
+    .modal-buttons button{
+      flex:1;
+      height:50px;
+      border:none;
+      border-radius:14px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .save-btn{
+      background:#5d8dff;
+      color:white;
+    }
+
+    .cancel-btn{
+      background:#232c3b;
+      color:white;
+    }
+
+    @media(max-width:768px){
+
+      body{
+        padding:20px;
+      }
+
+      .title{
+        font-size:2rem;
+      }
+
+      .timer{
+        font-size:2rem;
+      }
+
+      .boss-image{
+        height:320px;
+      }
+
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <div class="container">
+
+    <h1 class="title">WEEKLY BOSS TRACKER</h1>
+
+    <div class="boss-form">
+
+      <input type="text" id="bossName" placeholder="Boss Name">
+
+      <input type="number" id="respawnHours" placeholder="Respawn Hours">
+
+      <input type="text" id="bossImage" placeholder="Boss Image URL">
+
+      <button onclick="addBoss()">Add Boss</button>
+
+    </div>
+
+    <div class="boss-grid" id="bossGrid"></div>
+
+  </div>
+
+  <!-- MODAL -->
+
+  <div class="modal" id="arrivalModal">
+
+    <div class="modal-box">
+
+      <h2>Set Expected Arrival</h2>
+
+      <input
+      type="datetime-local"
+      id="arrivalInput">
+
+      <div class="modal-buttons">
+
+        <button
+        class="save-btn"
+        onclick="saveArrival()">
+          Save
+        </button>
+
+        <button
+        class="cancel-btn"
+        onclick="closeModal()">
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    let bosses =
+      JSON.parse(localStorage.getItem("bosses")) || [];
+
+    let selectedBossId = null;
+
+    function saveBosses(){
+      localStorage.setItem(
+        "bosses",
+        JSON.stringify(bosses)
+      );
+    }
+
+    function addBoss(){
+
+      const name =
+        document.getElementById("bossName").value.trim();
+
+      const hours =
+        document.getElementById("respawnHours").value;
+
+      const image =
+        document.getElementById("bossImage").value.trim();
+
+      if(!name || !hours){
+
+        alert(
+          "Please enter boss name and respawn hours."
+        );
+
+        return;
+
+      }
+
+      const boss = {
+
+        id:Date.now(),
+        name:name,
+        respawnHours:Number(hours),
+
+        image:image ||
+
+        "https://images.unsplash.com/photo-1542751110-97427bbecf20?q=80&w=1200&auto=format&fit=crop",
+
+        deadAt:null,
+        expectedArrival:null
+
+      };
+
+      bosses.push(boss);
+
+      saveBosses();
+      renderBosses();
+
+      document.getElementById("bossName").value = "";
+      document.getElementById("respawnHours").value = "";
+      document.getElementById("bossImage").value = "";
+
+    }
+
+    function markDead(id){
+
+      const boss =
+        bosses.find(b => b.id === id);
+
+      if(!boss) return;
+
+      boss.deadAt = new Date().getTime();
+      boss.expectedArrival = null;
+
+      saveBosses();
+      renderBosses();
+
+    }
+
+    // OPEN MODAL
+
+    function openArrivalModal(id){
+
+      selectedBossId = id;
+
+      document
+      .getElementById("arrivalModal")
+      .classList.add("active");
+
+    }
+
+    // CLOSE MODAL
+
+    function closeModal(){
+
+      document
+      .getElementById("arrivalModal")
+      .classList.remove("active");
+
+      document
+      .getElementById("arrivalInput")
+      .value = "";
+
+    }
+
+    // SAVE ARRIVAL
+
+    function saveArrival(){
+
+      const value =
+        document.getElementById("arrivalInput").value;
+
+      if(!value){
+
+        alert("Please select a date and time.");
+
+        return;
+
+      }
+
+      const boss =
+        bosses.find(b => b.id === selectedBossId);
+
+      if(!boss) return;
+
+      boss.expectedArrival =
+        new Date(value).getTime();
+
+      saveBosses();
+      renderBosses();
+      closeModal();
+
+    }
+
+    function deleteBoss(id){
+
+      bosses =
+        bosses.filter(b => b.id !== id);
+
+      saveBosses();
+      renderBosses();
+
+    }
+
+    function formatTime(ms){
+
+      const totalSeconds =
+        Math.floor(ms / 1000);
+
+      const days =
+        Math.floor(totalSeconds / 86400);
+
+      const hours =
+        Math.floor((totalSeconds % 86400) / 3600);
+
+      const minutes =
+        Math.floor((totalSeconds % 3600) / 60);
+
+      const seconds =
+        totalSeconds % 60;
+
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+    }
+
+    function renderBosses(){
+
+      const grid =
+        document.getElementById("bossGrid");
+
+      if(bosses.length === 0){
+
+        grid.innerHTML = `
+          <div class="empty">
+            <h2>No Bosses Yet</h2>
+            <p>Add your weekly bosses above.</p>
+          </div>
+        `;
+
+        return;
+
+      }
+
+      // SORT BY UPCOMING TIMER
+
+      const sortedBosses =
+        [...bosses].sort((a,b) => {
+
+          let timeA = Infinity;
+          let timeB = Infinity;
+
+          if(a.expectedArrival){
+
+            timeA = a.expectedArrival;
+
+          } else if(a.deadAt){
+
+            timeA =
+              a.deadAt +
+              (a.respawnHours * 60 * 60 * 1000);
+
+          }
+
+          if(b.expectedArrival){
+
+            timeB = b.expectedArrival;
+
+          } else if(b.deadAt){
+
+            timeB =
+              b.deadAt +
+              (b.respawnHours * 60 * 60 * 1000);
+
+          }
+
+          return timeA - timeB;
+
+      });
+
+      grid.innerHTML =
+        sortedBosses.map(boss => {
+
+        let timerText =
+          `<span class="ready">READY TO RESPAWN</span>`;
+
+        let respawnDate = "Waiting...";
+
+        let respawnTime = null;
+
+        if(boss.expectedArrival){
+
+          respawnTime =
+            boss.expectedArrival;
+
+        } else if(boss.deadAt){
+
+          respawnTime =
+            boss.deadAt +
+            (boss.respawnHours * 60 * 60 * 1000);
+
+        }
+
+        if(respawnTime){
+
+          const remaining =
+            respawnTime - new Date().getTime();
+
+          if(remaining > 0){
+
+            timerText =
+              formatTime(remaining);
+
+          } else {
+
+            timerText =
+            `<span class="ready">
+              READY TO RESPAWN
+            </span>`;
+
+          }
+
+          respawnDate =
+            new Date(respawnTime).toLocaleString(
+              "en-US",
+              {
+                weekday:"short",
+                hour:"2-digit",
+                minute:"2-digit",
+                hour12:true
+              }
+            );
+
+        }
+
+        return `
+
+          <div class="boss-card">
+
+            <img
+            class="boss-image"
+            src="${boss.image}"
+            alt="${boss.name}">
+
+            <div class="boss-content">
+
+              <span class="boss-type">
+                WEEKLY BOSS
+              </span>
+
+              <h2 class="boss-name">
+                ${boss.name}
+              </h2>
+
+              <p class="timer-label">
+                RESPAWN TIMER
+              </p>
+
+              <div class="timer">
+                ${timerText}
+              </div>
+
+              <div class="info-box">
+                <h4>EXPECTED ARRIVAL</h4>
+                <p>${respawnDate}</p>
+              </div>
+
+              <div class="info-box">
+                <h4>RESPAWN INTERVAL</h4>
+                <p>${boss.respawnHours} Hours</p>
+              </div>
+
+              <div class="buttons">
+
+                <button
+                class="dead-btn"
+                onclick="markDead(${boss.id})">
+                  Boss Died
+                </button>
+
+                <button
+                class="arrival-btn"
+                onclick="openArrivalModal(${boss.id})">
+                  Expected Arrival
+                </button>
+
+                <button
+                class="delete-btn"
+                onclick="deleteBoss(${boss.id})">
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }).join("");
+
+    }
+
+    setInterval(() => {
+
+      renderBosses();
+
+    }, 1000);
+
+    renderBosses();
+
+  </script>
+
+</body>
+</html>
